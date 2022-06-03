@@ -150,9 +150,9 @@ jobs:
     needs: Build
     runs-on: ubuntu-latest
     env:
-      resourceGroupName: '${{ env.RESOURCE_GROUP }}-Dev'
-      databricksWorkspaceName: '${{ env.WORKSPACE_NAME }}-Dev'
-      keyVaultName: '${{ env.KEY_VAULT_NAME }}-Dev'
+      resourceGroupName: 'Databricks-MyProject-Dev'
+      databricksWorkspaceName: 'Databricks-MyProject-Dev'
+      keyVaultName: 'KeyVault-MyProject-Dev'
 
     steps:
     # Show the environment variables for debugging
@@ -216,7 +216,7 @@ jobs:
     # Deploy Databricks Workspace
     - name: Deploy ARM Template (Databricks)
       uses: azure/CLI@v1
-      # if: ${{ env.MODE == 'SKIP FOR TESTING' }}
+      # if: ${{ github.event.inputs.MODE == 'SKIP FOR TESTING' }}
       with:
         inlineScript: |
           az group create --location "${{ env.LOCATION }}" --name "${{ env.resourceGroupName }}"
@@ -254,14 +254,14 @@ jobs:
         $GITHUB_WORKSPACE/deployment-scripts/deploy-clusters.sh ${{ steps.databricksSecretAction.outputs.databricks-dev-ops-tenant-id }} ${{ steps.databricksSecretAction.outputs.databricks-dev-ops-client-id }} ${{ steps.databricksSecretAction.outputs.databricks-dev-ops-client-secret }} ${{ steps.databricksSecretAction.outputs.databricks-dev-ops-subscription-id }} ${{ env.resourceGroupName }} ${{ env.databricksWorkspaceName }}
     # # Deploy Databricks Notebooks
     # - name: Deploy Databricks Notebooks
-    #   if: ${{ env.MODE == 'Databricks' }}
+    #   if: ${{ github.event.inputs.MODE == 'Databricks' }}
     #   run: |
-    #     cd "$GITHUB_WORKSPACE/${{ env.GIT_NOTEBOOK_PATH }}"
+    #     cd "$GITHUB_WORKSPACE/${{ github.event.inputs.GIT_NOTEBOOK_PATH }}"
     #     chmod +x $GITHUB_WORKSPACE/deployment-scripts/deploy-notebooks.sh
-    #     $GITHUB_WORKSPACE/deployment-scripts/deploy-notebooks.sh ${{ steps.databricksSecretAction.outputs.databricks-dev-ops-tenant-id }} ${{ steps.databricksSecretAction.outputs.databricks-dev-ops-client-id }} ${{ steps.databricksSecretAction.outputs.databricks-dev-ops-client-secret }} ${{ steps.databricksSecretAction.outputs.databricks-dev-ops-subscription-id }} ${{ env.resourceGroupName }} ${{ env.databricksWorkspaceName }} ${{ env.NOTEBOOK_DEPLOYMENT_PATH }}
+    #     $GITHUB_WORKSPACE/deployment-scripts/deploy-notebooks.sh ${{ steps.databricksSecretAction.outputs.databricks-dev-ops-tenant-id }} ${{ steps.databricksSecretAction.outputs.databricks-dev-ops-client-id }} ${{ steps.databricksSecretAction.outputs.databricks-dev-ops-client-secret }} ${{ steps.databricksSecretAction.outputs.databricks-dev-ops-subscription-id }} ${{ env.resourceGroupName }} ${{ env.databricksWorkspaceName }} ${{ github.event.inputs.NOTEBOOK_DEPLOYMENT_PATH }}
     # # Deploy Databricks Jobs
     # - name: Deploy Databricks Jobs
-    #   if: ${{ env.MODE == 'Databricks' }}
+    #   if: ${{ github.event.inputs.MODE == 'Databricks' }}
     #   run: |
     #     cd "$GITHUB_WORKSPACE/jobs"
     #     chmod +x $GITHUB_WORKSPACE/deployment-scripts/deploy-jobs.sh
