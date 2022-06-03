@@ -3,12 +3,11 @@
 name: Databricks CI-CD
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    types: [labeled]
-
+  pull_request_review:
+    types: 
+      - submitted
+    branches:    
+      - 'master'
 # workflow_dispatch:
 #   inputs:
 #     # This is the path of your notebooks in Git.  Currently, this is not recursively deploying notebooks
@@ -60,6 +59,25 @@ on:
 #       description: 'Deployment Mode (Databricks or Initialize-KeyVault)'
 #       required: true
 #       default: 'Databricks'
+
+env:
+  # This is the path of your notebooks in Git.  Currently, this is not recursively deploying notebooks
+  # GIT_NOTEBOOK_PATH: 'notebooks/MyProject'
+  # This is where in your Databricks workspace your notebooks will be deployed
+  # NOTEBOOK_DEPLOYMENT_PATH: '/MyProject'
+  # This resource group for the Databricks workspace and KeyVault
+  RESOURCE_GROUP: 'Databricks-MyProject'
+  # The Azure region to which to deploy your resources
+  LOCATION: 'WestEurope'
+  # This is the name of your Azure Databricks resource
+  WORKSPACE_NAME: 'Databricks-MyProject'
+  # This is a KeyVault for holding the Service Principal to make Databricks API calls and to hold Databricks KeyVault backed Secrets
+  KEY_VAULT_NAME: 'KeyVault-MyProject2'
+  # This is a KeyVault for holding the Service Principal to make Databricks API calls and to hold Databricks KeyVault backed Secrets
+  SUBSCRIPTION_ID: '801d1e53-d014-4ff2-8e22-79028b8a8c23'
+  # Inialize the system
+  # Note: We only want to run the KeyVault ARM template once.  If you keep re-running, then you will OVERWRITE your values. 'Deployment Mode (Databricks or Initialize-KeyVault)'
+  MODE: 'Databricks'
 
 
 jobs:
