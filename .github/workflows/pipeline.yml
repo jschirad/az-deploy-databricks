@@ -91,7 +91,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@
+      uses: actions/checkout@v3
 
     # Show the environment variables for debugging
     - name: Display Environment Variable
