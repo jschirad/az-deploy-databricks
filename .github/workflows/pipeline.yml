@@ -3,11 +3,12 @@
 name: Databricks CI-CD
 
 on:
-  pull_request_review:
-    types: 
-      - submitted
-    branches:    
-      - 'master'
+  push: master
+  # pull_request_review:
+  #   types: 
+  #     - submitted
+  #   branches:    
+  #     - 'master'
 # workflow_dispatch:
 #   inputs:
 #     # This is the path of your notebooks in Git.  Currently, this is not recursively deploying notebooks
