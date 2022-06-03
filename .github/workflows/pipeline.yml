@@ -2,8 +2,7 @@
 
 name: Databricks CI-CD
 
-on:
-  push: master
+on: push
   # pull_request_review:
   #   types: 
   #     - submitted
