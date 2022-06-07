@@ -151,7 +151,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
       with:
-        repository: 'https://github.alm.europe.cloudcenter.corp/sgt-procesador-journal/jou-accountingjournalspark'
+        repository: 'github.alm.europe.cloudcenter.corp/sgt-procesador-journal/jou-accountingjournalspark'
         refs: 'development'
         token: ${{ secrets.local_token }}
     # Nexus Repository Publisher 
