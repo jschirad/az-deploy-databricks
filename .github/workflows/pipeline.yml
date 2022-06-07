@@ -87,7 +87,7 @@ jobs:
   # Currently this is not building and JAR files, but you would do that here
   # This is packaging up the files from Git to the Artifacts files
   #############################################################
-  Azure_Infra:
+  Build:
     runs-on: ubuntu-latest
 
     steps:
@@ -150,6 +150,10 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+      with:
+        repository: 'https://github.alm.europe.cloudcenter.corp/sgt-procesador-journal/jou-accountingjournalspark'
+        refs: 'development'
+        token: ${{ secrets.local_token }}
     # Nexus Repository Publisher 
     # Publish components from GitHub Action workflow to Nexus Repository.
     # - name: Set up JDK 1.8
