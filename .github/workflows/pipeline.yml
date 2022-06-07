@@ -192,7 +192,7 @@ jobs:
   Deploy-Dev:
     needs: [Azure-ARM, Nexus, SonarQube]
     runs-on: ubuntu-latest
-    if: contains(github.event.pull_request.labels.*.name, 'deploy environment')
+    if: contains(github.event.pull_request.labels.*.name, 'Build and Deploy')
     env:
       resourceGroupName: 'Databricks-MyProject-Dev'
       databricksWorkspaceName: 'Databricks-MyProject-Dev'
@@ -314,7 +314,7 @@ jobs:
   Destroy-Dev:
     runs-on: ubuntu-latest
 
-    if: contains(github.event.pull_request.labels.*.name, 'destroy environment')
+    if: contains(github.event.pull_request.labels.*.name, 'Destroy')
 
     steps:
       - name: Checkout repository
