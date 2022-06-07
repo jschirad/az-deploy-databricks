@@ -149,8 +149,6 @@ jobs:
 
     steps:
       - run:  git clone https://github.alm.europe.cloudcenter.corp/sgt-procesador-journal/jou-accountingjournalspark
-        with: 
-          token: ${{ secrets.local_token }}
 
     # Nexus Repository Publisher 
     # Publish components from GitHub Action workflow to Nexus Repository.
