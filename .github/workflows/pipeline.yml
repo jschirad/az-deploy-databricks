@@ -2,11 +2,10 @@
 
 name: Databricks CI-CD
 
-on: 
-  push
-  # pull_request_review:
-  #   types: 
-  #     - submitted
+on:   
+  pull_request_review:
+    types: 
+      - labeled
   #   branches:    
   #     - 'master'
 # workflow_dispatch:
@@ -310,3 +309,21 @@ jobs:
     #     cd "$GITHUB_WORKSPACE/jobs"
     #     chmod +x $GITHUB_WORKSPACE/deployment-scripts/deploy-jobs.sh
     #     $GITHUB_WORKSPACE/deployment-scripts/deploy-jobs.sh ${{ steps.databricksSecretAction.outputs.databricks-dev-ops-tenant-id }} ${{ steps.databricksSecretAction.outputs.databricks-dev-ops-client-id }} ${{ steps.databricksSecretAction.outputs.databricks-dev-ops-client-secret }} ${{ steps.databricksSecretAction.outputs.databricks-dev-ops-subscription-id }} ${{ env.resourceGroupName }} ${{ env.databricksWorkspaceName }}
+  destroy-azure-resources:
+    runs-on: ubuntu-latest
+
+    if: contains(github.event.pull_request.labels.*.name, 'destroy environment')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Destroy Azure environment
+        if: success()
+        run: |
+          az group delete --name ${{env.RESOURCE_GROUP}} --subscription ${{env.SUBSCRIPTION_ID}} --yes
