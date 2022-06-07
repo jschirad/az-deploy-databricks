@@ -148,11 +148,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      with:
-        repository: 'github.alm.europe.cloudcenter.corp/sgt-procesador-journal/jou-accountingjournalspark'
-        token: ${{ secrets.local_token }}
+      - run:  git clone https://github.alm.europe.cloudcenter.corp/sgt-procesador-journal/jou-accountingjournalspark
+        with: 
+          token: ${{ secrets.local_token }}
+
     # Nexus Repository Publisher 
     # Publish components from GitHub Action workflow to Nexus Repository.
     # - name: Set up JDK 1.8
