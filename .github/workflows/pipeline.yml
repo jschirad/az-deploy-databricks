@@ -85,8 +85,9 @@ jobs:
   # Currently this is not building and JAR files, but you would do that here
   # This is packaging up the files from Git to the Artifacts files
   #############################################################
-  Azure:
+  Azure-ARM:
     runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'build')
 
     steps:
     - name: Checkout code
@@ -147,9 +148,9 @@ jobs:
 # Publish to Nexus
 #############################################################
 
-  Nexus_Publisher:
+  Nexus:
     runs-on: ubuntu-latest
-
+    if: contains(github.event.pull_request.labels.*.name, 'build')
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -177,8 +178,9 @@ jobs:
 # SonarQube
 #############################################################
 
-  Sonar_Scan:
+  SonarQube:
     runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'build')
 
     steps:
     - name: Checkout code
@@ -187,9 +189,10 @@ jobs:
 #############################################################
 # Deploy to Dev
 #############################################################
-  Deploy_Dev:
-    needs: [Azure, Nexus_Publisher, Sonar_Scan]
+  Deploy-Dev:
+    needs: [Azure-ARM, Nexus, SonarQube]
     runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'deploy environment')
     env:
       resourceGroupName: 'Databricks-MyProject-Dev'
       databricksWorkspaceName: 'Databricks-MyProject-Dev'
@@ -246,13 +249,13 @@ jobs:
     #     name: 'deployment-scripts'
     #     path: ${{ github.workspace }}/deployment-scripts
         
-    # Login to Azure
-    - name: Login via Az module
-      uses: azure/login@v1.1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-        # set this if you will be using PowerShell
-        enable-AzPSSession: true
+    # # Login to Azure
+    # - name: Login via Az module
+    #   uses: azure/login@v1.1
+    #   with:
+    #     creds: ${{ secrets.AZURE_CREDENTIALS }}
+    #     # set this if you will be using PowerShell
+    #     enable-AzPSSession: true
 
 
     # # Deploy Databricks Workspace
@@ -308,7 +311,7 @@ jobs:
     #     cd "$GITHUB_WORKSPACE/jobs"
     #     chmod +x $GITHUB_WORKSPACE/deployment-scripts/deploy-jobs.sh
     #     $GITHUB_WORKSPACE/deployment-scripts/deploy-jobs.sh ${{ steps.databricksSecretAction.outputs.databricks-dev-ops-tenant-id }} ${{ steps.databricksSecretAction.outputs.databricks-dev-ops-client-id }} ${{ steps.databricksSecretAction.outputs.databricks-dev-ops-client-secret }} ${{ steps.databricksSecretAction.outputs.databricks-dev-ops-subscription-id }} ${{ env.resourceGroupName }} ${{ env.databricksWorkspaceName }}
-  destroy-azure-resources:
+  Destroy-Dev:
     runs-on: ubuntu-latest
 
     if: contains(github.event.pull_request.labels.*.name, 'destroy environment')
