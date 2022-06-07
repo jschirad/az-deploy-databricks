@@ -87,62 +87,62 @@ jobs:
   # Currently this is not building and JAR files, but you would do that here
   # This is packaging up the files from Git to the Artifacts files
   #############################################################
-  Build:
-    runs-on: ubuntu-latest
+  # Build:
+  #   runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v3
 
-    # Show the environment variables for debugging
-    - name: Display Environment Variable
-      uses: azure/powershell@v1
-      with:
-        inlineScript: |
-          dir env:
-        azPSVersion: '3.1.0'
+  #   # Show the environment variables for debugging
+  #   - name: Display Environment Variable
+  #     uses: azure/powershell@v1
+  #     with:
+  #       inlineScript: |
+  #         dir env:
+  #       azPSVersion: '3.1.0'
 
-    # Publish Artifact: ARM-Templates
-    - name: 'Publish Artifact: ARM-Templates' 
-      uses: actions/upload-artifact@v2
-      with:
-        name: 'ARM-Templates'
-        path: '${{ github.workspace }}/ARM-Templates'
+  #   # Publish Artifact: ARM-Templates
+  #   - name: 'Publish Artifact: ARM-Templates' 
+  #     uses: actions/upload-artifact@v2
+  #     with:
+  #       name: 'ARM-Templates'
+  #       path: '${{ github.workspace }}/ARM-Templates'
 
-    # Publish Artifact: Databricks-Clusters
-    - name: 'Publish Artifact: Databricks-Clusters' 
-      uses: actions/upload-artifact@v2
-      with:
-        name: 'clusters'
-        path: '${{ github.workspace }}/clusters'
+  #   # Publish Artifact: Databricks-Clusters
+  #   - name: 'Publish Artifact: Databricks-Clusters' 
+  #     uses: actions/upload-artifact@v2
+  #     with:
+  #       name: 'clusters'
+  #       path: '${{ github.workspace }}/clusters'
 
-    # # Publish Artifact: Databricks-Notebooks
-    # - name: 'Publish Artifact: Databricks-Notebooks' 
-    #   uses: actions/upload-artifact@v2
-    #   with:
-    #     name: 'notebooks'
-    #     path: '${{ github.workspace }}/notebooks'
+  #   # # Publish Artifact: Databricks-Notebooks
+  #   # - name: 'Publish Artifact: Databricks-Notebooks' 
+  #   #   uses: actions/upload-artifact@v2
+  #   #   with:
+  #   #     name: 'notebooks'
+  #   #     path: '${{ github.workspace }}/notebooks'
 
-    # # Publish Artifact: Databricks-Jobs
-    # - name: 'Publish Artifact: Databricks-Jobs' 
-    #   uses: actions/upload-artifact@v2
-    #   with:
-    #     name: 'jobs'
-    #     path: '${{ github.workspace }}/jobs'
+  #   # # Publish Artifact: Databricks-Jobs
+  #   # - name: 'Publish Artifact: Databricks-Jobs' 
+  #   #   uses: actions/upload-artifact@v2
+  #   #   with:
+  #   #     name: 'jobs'
+  #   #     path: '${{ github.workspace }}/jobs'
 
-    # Publish Artifact: Databricks-Init-Scripts
-    - name: 'Publish Artifact: Databricks-Init-Scripts' 
-      uses: actions/upload-artifact@v2
-      with:
-        name: 'init-scripts'
-        path: '${{ github.workspace }}/init-scripts'
+  #   # Publish Artifact: Databricks-Init-Scripts
+  #   - name: 'Publish Artifact: Databricks-Init-Scripts' 
+  #     uses: actions/upload-artifact@v2
+  #     with:
+  #       name: 'init-scripts'
+  #       path: '${{ github.workspace }}/init-scripts'
 
-    # Publish Artifact: Databricks-Deployment-Scripts
-    - name: 'Publish Artifact: Databricks-Deployment-Scripts' 
-      uses: actions/upload-artifact@v2
-      with:
-        name: 'deployment-scripts'
-        path: '${{ github.workspace }}/deployment-scripts'
+  #   # Publish Artifact: Databricks-Deployment-Scripts
+  #   - name: 'Publish Artifact: Databricks-Deployment-Scripts' 
+  #     uses: actions/upload-artifact@v2
+  #     with:
+  #       name: 'deployment-scripts'
+  #       path: '${{ github.workspace }}/deployment-scripts'
 
   Nexus_Publisher:
     runs-on: ubuntu-latest
@@ -152,7 +152,6 @@ jobs:
       uses: actions/checkout@v3
       with:
         repository: 'github.alm.europe.cloudcenter.corp/sgt-procesador-journal/jou-accountingjournalspark'
-        refs: 'development'
         token: ${{ secrets.local_token }}
     # Nexus Repository Publisher 
     # Publish components from GitHub Action workflow to Nexus Repository.
@@ -177,36 +176,36 @@ jobs:
 #############################################################
 # Deploy to Dev
 #############################################################
-  Deploy_Dev:
-    needs: Build
-    runs-on: ubuntu-latest
-    env:
-      resourceGroupName: 'Databricks-MyProject-Dev'
-      databricksWorkspaceName: 'Databricks-MyProject-Dev'
-      keyVaultName: 'KeyVault-MyProject-Dev'
+  # Deploy_Dev:
+  #   needs: Build
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     resourceGroupName: 'Databricks-MyProject-Dev'
+  #     databricksWorkspaceName: 'Databricks-MyProject-Dev'
+  #     keyVaultName: 'KeyVault-MyProject-Dev'
 
-    steps:
-    # Show the environment variables for debugging
-    - name: Display Environment Variable
-      uses: azure/powershell@v1
-      with:
-        inlineScript: |
-          dir env:
-        azPSVersion: '3.1.0'        
+  #   steps:
+  #   # Show the environment variables for debugging
+  #   - name: Display Environment Variable
+  #     uses: azure/powershell@v1
+  #     with:
+  #       inlineScript: |
+  #         dir env:
+  #       azPSVersion: '3.1.0'        
 
-    # Download Artifact: ARM-Templates
-    - name: 'Download Artifact: ARM-Templates' 
-      uses: actions/download-artifact@v2
-      with:
-        name: 'ARM-Templates'
-        path: ${{ github.workspace }}/ARM-Templates
+  #   # Download Artifact: ARM-Templates
+  #   - name: 'Download Artifact: ARM-Templates' 
+  #     uses: actions/download-artifact@v2
+  #     with:
+  #       name: 'ARM-Templates'
+  #       path: ${{ github.workspace }}/ARM-Templates
 
-    # Download Artifact: Databricks-Clusters
-    - name: 'Download Artifact: Databricks-Clusters' 
-      uses: actions/download-artifact@v2
-      with:
-        name: 'clusters'
-        path: ${{ github.workspace }}/clusters
+  #   # Download Artifact: Databricks-Clusters
+  #   - name: 'Download Artifact: Databricks-Clusters' 
+  #     uses: actions/download-artifact@v2
+  #     with:
+  #       name: 'clusters'
+  #       path: ${{ github.workspace }}/clusters
 
     # # Download Artifact: Databricks-Notebooks
     # - name: 'Download Artifact: Databricks-Notebooks' 
@@ -223,24 +222,24 @@ jobs:
     #     path: ${{ github.workspace }}/jobs
 
     # Download Artifact: Databricks-Init-Scripts
-    - name: 'Download Artifact: Databricks-Init-Scripts' 
-      uses: actions/download-artifact@v2
-      with:
-        name: 'init-scripts'
-        path: ${{ github.workspace }}/init-scripts
+    # - name: 'Download Artifact: Databricks-Init-Scripts' 
+    #   uses: actions/download-artifact@v2
+    #   with:
+    #     name: 'init-scripts'
+    #     path: ${{ github.workspace }}/init-scripts
 
-    # Download Artifact: Deployment Scripts
-    - name: 'Download Artifact: Deployment Scripts' 
-      uses: actions/download-artifact@v2
-      with:
-        name: 'deployment-scripts'
-        path: ${{ github.workspace }}/deployment-scripts
+    # # Download Artifact: Deployment Scripts
+    # - name: 'Download Artifact: Deployment Scripts' 
+    #   uses: actions/download-artifact@v2
+    #   with:
+    #     name: 'deployment-scripts'
+    #     path: ${{ github.workspace }}/deployment-scripts
         
-    # Login to Azure
-    - name: Login via Az module
-      uses: azure/login@v1.1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    # # Login to Azure
+    # - name: Login via Az module
+    #   uses: azure/login@v1.1
+    #   with:
+    #     creds: ${{ secrets.AZURE_CREDENTIALS }}
         # set this if you will be using PowerShell
         # enable-AzPSSession: true
 
