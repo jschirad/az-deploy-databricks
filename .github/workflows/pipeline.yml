@@ -211,9 +211,13 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
         # set this if you will be using PowerShell
-        # enable-AzPSSession: true 
+        # enable-AzPSSession: true
+    # Triyng Call reusable workflow
+    - name: Reusable workflow
+      uses: jschirad/hello-github-actions/.github/workflows/main.yml@main
 
-    # Deploy Databricks Workspace
+
+    # # Deploy Databricks Workspace
     # - name: Deploy ARM Template (Databricks)
     #   uses: azure/CLI@v1
     #   # if: ${{ github.event.inputs.MODE == 'SKIP FOR TESTING' }}
