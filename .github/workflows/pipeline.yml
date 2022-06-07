@@ -2,7 +2,9 @@
 
 name: Databricks CI-CD
 
-on: push
+on: 
+  - push
+  - workflow_call:
   # pull_request_review:
   #   types: 
   #     - submitted
