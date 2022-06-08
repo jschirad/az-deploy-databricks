@@ -73,7 +73,7 @@ env:
   # This is a KeyVault for holding the Service Principal to make Databricks API calls and to hold Databricks KeyVault backed Secrets
   KEY_VAULT_NAME: 'KeyVault-MyProject2'
   # This is a KeyVault for holding the Service Principal to make Databricks API calls and to hold Databricks KeyVault backed Secrets
-  SUBSCRIPTION_ID: 'ebac6c00-3c2f-4d56-82c0-8057225d44fa'
+  SUBSCRIPTION_ID: '801d1e53-d014-4ff2-8e22-79028b8a8c23'
   # Inialize the system
   # Note: We only want to run the KeyVault ARM template once.  If you keep re-running, then you will OVERWRITE your values. 'Deployment Mode (Databricks or Initialize-KeyVault)'
   MODE: 'Databricks'
