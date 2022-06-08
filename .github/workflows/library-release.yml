@@ -1,0 +1,214 @@
+name: Library Release
+on:
+  release:
+    types:
+      - published
+
+  push:
+    branches:
+      - 'main'
+
+env:
+  TECHNOLOGY: 'Java_Maven'
+  REPO: ${{ github.repository }}
+  REPO_BRANCH: ${{ github.ref }}
+  ENV_PROFILE: 'properties'
+  PROFILE: 'alm-one-pro'
+  PROFILE_FILE: 'sgt-config-pro.env'
+  INTEGRATION_BRANCH: 'development'
+
+jobs:
+
+  prepare-pom:
+    name: Preparing Release Version
+    runs-on: alm-nextgen-runner
+    if: github.event_name == 'push'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set global environment variables for workflow
+        uses: santander-group/action0@main
+        with:
+          token:    ${{ secrets.ACTIONS_PA }}
+          branch:   'main'
+          filename: ${{ env.PROFILE_FILE }}
+          cleanup:  'true'
+          profile: ${{ env.PROFILE }}
+      - name: Set release version
+        id: set-release-version
+        uses: santander-group/maven-version-action@v1.0.0
+        with:
+          bump_type: 'none'
+          snapshot_suffix: 'remove'
+      - name: Git config
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+      - name: Committing new release pom.xml
+        run: |
+          if [[ $(git status --porcelain | grep pom.xml)  ]]; then
+            git commit -am '[GitHub Actions] removing suffix from pom.xml: ${{ steps.set-release-version.outputs.version }}'
+            git push
+          else
+            echo "::notice::pom.xml version was not suffixed - no commit done"
+          fi
+      - name: Check out integration branch
+        run: git checkout '${{ env.INTEGRATION_BRANCH }}'
+      - name: Merge main into '${{ env.INTEGRATION_BRANCH }}'
+        shell: bash --noprofile --norc {0}
+        run: |
+          git merge -m "[GitHub Actions] Merge branch 'main' into '${{ env.INTEGRATION_BRANCH }}'" main
+          if [[ $? -ne 0 ]]; then
+            if [ $(git ls-files -u | wc -l) -gt 0 ]; then
+              conflict_lines=$(git diff -p --no-ext-diff | grep '^ \?[+-][^+-]')
+              echo -e "Conflicting lines:\n${conflict_lines}"
+              echo "${conflict_lines}" | grep -v "${{ steps.set-release-version.outputs.version }}"
+              if [[ $? -eq 1 ]]; then
+                git merge --abort
+                git merge -X theirs -m "[GitHub Actions] Merge branch 'main' into '${{ env.INTEGRATION_BRANCH }}' (accepting release version)" main
+                echo "Auto-merged branch 'main' into '${{ env.INTEGRATION_BRANCH }}' (accepting release version)"
+              else
+                echo "::warn::Unexpected conflicts detected while merging [main] into [${{ env.INTEGRATION_BRANCH }}]. Release will go on, but please resolve those conflicts before continuing work on branch [${{ env.INTEGRATION_BRANCH }}]"
+                echo $diff_output
+              fi
+            else
+              echo "::warn::Error while merging [main] into [${{ env.INTEGRATION_BRANCH }}]. Release will go on, but you will probably need to perform this merge manually afterwards"
+            fi
+          fi
+      - name: Set next development version
+        id: set-next-development-version
+        uses: santander-group/maven-version-action@v1.0.0
+        with:
+          bump_type: 'patch'
+          snapshot_suffix: 'add'
+      - name: Committing new development pom.xml
+        run: |
+          git commit -am '[GitHub Actions] Bumped pom.xml version to ${{ steps.set-next-development-version.outputs.version }} (from ${{ steps.set-next-development-version.outputs.previous_version }}) [skip ci]'
+          git push
+  mvn-build:
+    needs: prepare-pom
+    if: |
+      always() && !cancelled() &&
+      (needs.prepare-pom.result == 'skipped' || needs.prepare-pom.result == 'success')
+    name: Maven build
+    runs-on: alm-nextgen-runner
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Set global environment variables for workflow
+        uses: santander-group/action0@main
+        with:
+          token:    ${{ secrets.ACTIONS_PA }}
+          branch:   'main'
+          filename: ${{ env.PROFILE_FILE }}
+          cleanup:  'true'
+          profile: ${{ env.PROFILE }}
+      - name: Set profile environment variables for workflow
+        uses: santander-group/load-env-vars-action@main
+        with:
+          repository: ${{ env.REPO }}
+          token: ${{ secrets.ACTIONS_PA }}
+          branch: ${{ env.REPO_BRANCH }}
+          directory: 'envs'
+          profile: ${{ env.ENV_PROFILE }}
+          cleanup: 'false'
+      - name: Build with Maven
+        run: "./mvnw clean verify"
+
+  sonar:
+    needs: mvn-build
+    if: always() && !cancelled() && needs.mvn-build.result == 'success'
+    name: SonarQube
+    runs-on: alm-nextgen-runner
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Set global environment variables for workflow
+        uses: santander-group/action0@main
+        with:
+          token:    ${{ secrets.ACTIONS_PA }}
+          branch:   'main'
+          filename: ${{ env.PROFILE_FILE }}
+          cleanup:  'true'
+          profile: ${{ env.PROFILE }}
+      - name: Set profile environment variables for workflow
+        uses: santander-group/load-env-vars-action@main
+        with:
+          repository: ${{ env.REPO }}
+          token: ${{ secrets.ACTIONS_PA }}
+          branch: ${{ env.REPO_BRANCH }}
+          directory: 'envs'
+          profile: ${{ env.ENV_PROFILE }}
+          cleanup: 'false'
+      - name: Generate report files with Maven
+        run: "./mvnw clean verify"
+      - name: SonarQube - Setting environments
+        uses: santander-group/alm-sonar-instance@main
+        id: sonar-data
+        with:
+          sonar-instance: ${{ env.SONAR_ID }}
+      - name: Set Java and Node version
+        id: set-java-nodejs
+        run: |
+          if [[ -f ${{ github.workspace }}/.tool-versions ]]
+          then
+            mv ${{ github.workspace }}/.tool-versions ${{ github.workspace }}/.tool-versions.bk
+          fi
+          asdf install java "adoptopenjdk-11.0.9+101"
+          asdf local java "adoptopenjdk-11.0.9+101"
+          echo ::set-output name=javahome::$(asdf where java)
+          echo ::set-output name=runasdf::true
+          asdf install nodejs "12.22.12"
+          asdf local nodejs "12.22.12"
+      - name: SonarQube - Scan and QG
+        uses: santander-group/alm-nxt-gen-sonar@v1.1.0
+        timeout-minutes: 15
+        env:
+          JAVA_HOME: ${{ steps.set-java-nodejs.outputs.javahome }}
+        with:
+          sonar-token: ${{ secrets[steps.sonar-data.outputs.sonar-token] }}
+          sonar-url: ${{ steps.sonar-data.outputs.sonar-url }}
+          sonar-maven-plugin: ${{ steps.sonar-data.outputs.sonar-maven-plugin }}
+          sonar-project-key: ${{ env.SONAR_PROJECT_KEY }}
+          sonar-properties: ${{ env.SONAR_PROPERTIES }}
+          sonar-report-path: ${{ env.SONAR_REPORT_PATH }}
+      - name: Restore Java and NodeJS version
+        if: ${{ 'true' == steps.set-java-nodejs.outputs.runasdf }}
+        run: |
+          rm ${{ github.workspace }}/.tool-versions
+          if [[ -f ${{ github.workspace }}/.tool-versions.bk ]]
+          then
+            mv -f ${{ github.workspace }}/.tool-versions.bk ${{ github.workspace }}/.tool-versions
+          fi
+      - name: SonarQube - Create annotation
+        if: ${{ failure() }}
+        shell: bash
+        run: echo "::error::Result Sonar Analysis FAILED"
+
+  nexus-repository-upload:
+    needs: sonar
+    name: Nexus repository upload
+    runs-on: alm-nextgen-runner
+    if: |
+      always() && !cancelled() &&
+      github.event_name == 'release' &&
+      needs.sonar.result == 'success'
+    steps:
+      # self-hosted cache pending
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Set global environment variables for workflow
+        uses: santander-group/action0@main
+        with:
+          token: ${{ secrets.ACTIONS_PA }}
+          branch: 'main'
+          filename: ${{ env.PROFILE_FILE }}
+          cleanup: 'true'
+          profile: ${{ env.PROFILE }}
+      - name: Publish package
+        env:
+          SGT_DESPLOYSGTPRO_USER_NEXTGEN: ${{ secrets.SGT_DESPLOYSGTPRO_USER_NEXTGEN }}
+          SGT_DESPLOYSGTPRO_PASSWORD_NEXTGEN: ${{ secrets.SGT_DESPLOYSGTPRO_PASSWORD_NEXTGEN }}
+        run: "./mvnw -X clean deploy"
