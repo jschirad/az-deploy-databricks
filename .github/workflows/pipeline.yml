@@ -273,9 +273,7 @@ jobs:
 #############################################################
   Destroy-Dev:
     runs-on: ubuntu-latest
-
     if: contains(github.event.pull_request.labels.*.name, 'Destroy')
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
