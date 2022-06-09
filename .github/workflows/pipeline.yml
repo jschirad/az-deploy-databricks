@@ -76,8 +76,8 @@ env:
   SUBSCRIPTION_ID: '801d1e53-d014-4ff2-8e22-79028b8a8c23'
   # Inialize the system
   # Note: We only want to run the KeyVault ARM template once.  If you keep re-running, then you will OVERWRITE your values. 'Deployment Mode (Databricks or Initialize-KeyVault)'
-  MODE: 'Databricks'
-#  MODE: 'Initialize-KeyVault'
+  # MODE: 'Databricks'
+  MODE: 'Initialize-KeyVault'
   ACTIONS_ALLOW_UNSECURE_COMMANDS: True
 
 
@@ -237,7 +237,6 @@ jobs:
       uses: Azure/get-keyvault-secrets@v1.0
       if: ${{ env.MODE == 'Databricks' }}
       with:
-        # inlineScript: ACTIONS_ALLOW_UNSECURE_COMMANDS=true
         keyvault: ${{ env.keyVaultName }}
         secrets: 'databricks-dev-ops-subscription-id,databricks-dev-ops-tenant-id,databricks-dev-ops-client-id,databricks-dev-ops-client-secret'
       id: databricksSecretAction
