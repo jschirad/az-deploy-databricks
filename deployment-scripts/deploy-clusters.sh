@@ -8,7 +8,7 @@ tenant_id=$1
 client_id=$2
 client_secret=$3
 subscription_id=$4
-resourceGroup=$5
+resourceGroup='Databricks-MyProject'
 workspaceName=$6
 
 azure_databricks_resource_id="2ff814a6-3304-4ab8-85cb-cd0e6f879c1d"
