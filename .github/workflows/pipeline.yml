@@ -156,6 +156,7 @@ jobs:
       resourceGroupName: 'Databricks-MyProject'
       databricksWorkspaceName: 'Databricks-MyProject'
       keyVaultName: 'KeyVault-MyProject'
+      GITHUB_WORKSPACE: ${{ github.workspace }}
 
     steps:
    # Show the environment variables for debugging
