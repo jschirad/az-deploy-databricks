@@ -9,6 +9,13 @@ subscription_id=$4
 resourceGroup=$5
 workspaceName=$6
 
+echo $tenant_id
+echo $client_id
+echo $client_secret
+echo $subscription_id
+echo $resourceGroup
+echo $workspaceName
+
 azure_databricks_resource_id="2ff814a6-3304-4ab8-85cb-cd0e6f879c1d"
 resourceId="/subscriptions/$subscription_id/resourceGroups/$resourceGroup/providers/Microsoft.Databricks/workspaces/$workspaceName"
 
