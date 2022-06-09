@@ -8,15 +8,15 @@ tenant_id=$1
 client_id=$2
 client_secret=$3
 subscription_id=$4
-resourceGroup=$5
+resourceGroup='Databricks-MyProject'
 workspaceName=$6
 
 azure_databricks_resource_id="2ff814a6-3304-4ab8-85cb-cd0e6f879c1d"
 resourceId="/subscriptions/$subscription_id/resourceGroups/$resourceGroup/providers/Microsoft.Databricks/workspaces/$workspaceName"
 
-######################################################################################
-# Get access tokens for Databricks API
-######################################################################################
+echo '######################################################################################'
+echo '                  Get access tokens for Databricks API                                '
+echo '######################################################################################'
 
 accessToken=$(curl -X POST https://login.microsoftonline.com/$tenant_id/oauth2/token \
   -F resource=$azure_databricks_resource_id \
@@ -31,9 +31,9 @@ managementToken=$(curl -X POST https://login.microsoftonline.com/$tenant_id/oaut
   -F client_secret=$client_secret | jq .access_token --raw-output) 
 
 
-######################################################################################
-# Get Databricks workspace URL (e.g. adb-5946405904802522.2.azuredatabricks.net)
-######################################################################################
+echo '######################################################################################'
+echo '                          Get Databricks workspace URL                               '       
+echo '######################################################################################'
 workspaceUrl=$(curl -X GET \
         -H "Content-Type: application/json" \
         -H "Authorization: Bearer $managementToken" \
@@ -43,9 +43,9 @@ workspaceUrl=$(curl -X GET \
 echo "Databricks workspaceUrl: $workspaceUrl"
 
 
-######################################################################################
-# Deploy clusters (Add or Update existing)
-######################################################################################
+echo '######################################################################################'
+echo '                         Deploy clusters (Add or Update existing)                     '       
+echo '######################################################################################'
 
 replaceSource="./"
 replaceDest=""
@@ -107,16 +107,17 @@ find . -type f -name "*" -print0 | while IFS= read -r -d '' file; do
 
 done
 
+echo '######################################################################################'
+echo '                         Sleep will the above calls complete                          '
+echo '######################################################################################'
 
-######################################################################################
-# Sleep will the above calls complete
-######################################################################################
+
 read -p "sleeping" -t 15
 
 
-######################################################################################
-# Stop the clusters
-######################################################################################
+echo '######################################################################################'
+echo '                         Stop the clusters                                            '
+echo '######################################################################################'
 
 # Get a list of clusters so we know if we need to create or edit
 clusterList=$(curl GET https://$workspaceUrl/api/2.0/clusters/list \
