@@ -6,7 +6,7 @@ tenant_id=$1
 client_id=$2
 client_secret=$3
 subscription_id=$4
-resourceGroup=$5
+resourceGroup='Databricks-MyProject'
 workspaceName=$6
 
 echo $tenant_id
