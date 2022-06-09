@@ -9,21 +9,14 @@ subscription_id=$4
 resourceGroup='Databricks-MyProject'
 workspaceName=$6
 
-echo $tenant_id
-echo $client_id
-echo $client_secret
-echo $subscription_id
-echo $resourceGroup
-echo $workspaceName
-
 azure_databricks_resource_id="2ff814a6-3304-4ab8-85cb-cd0e6f879c1d"
 resourceId="/subscriptions/$subscription_id/resourceGroups/$resourceGroup/providers/Microsoft.Databricks/workspaces/$workspaceName"
 
 initScriptsPath="dbfs:/init-scripts"
 
-######################################################################################
-# Get access tokens for Databricks API
-######################################################################################
+echo '######################################################################################'
+echo '                 Get access tokens for Databricks API                                 '
+echo '######################################################################################'
 
 accessToken=$(curl -X POST https://login.microsoftonline.com/$tenant_id/oauth2/token \
   -F resource=$azure_databricks_resource_id \
@@ -38,9 +31,9 @@ managementToken=$(curl -X POST https://login.microsoftonline.com/$tenant_id/oaut
   -F client_secret=$client_secret | jq .access_token --raw-output) 
 
 
-######################################################################################
-# Get Databricks workspace URL (e.g. adb-5946405904802522.2.azuredatabricks.net)
-######################################################################################
+echo '######################################################################################'
+echo '# Get Databricks workspace URL (e.g. adb-5946405904802522.2.azuredatabricks.net)'
+echo '######################################################################################'
 workspaceUrl=$(curl -X GET \
         -H "Content-Type: application/json" \
         -H "Authorization: Bearer $managementToken" \
@@ -51,9 +44,9 @@ echo "Databricks workspaceUrl: $workspaceUrl"
 
 
 
-######################################################################################
-# Create directory for Init Scripts
-######################################################################################
+echo '######################################################################################'
+echo '# Create directory for Init Scripts'
+echo '######################################################################################'
 JSON="{ \"path\" : \"$initScriptsPath\" }"
 
 echo "curl https://$workspaceUrl/api/2.0/dbfs/mkdirs -d $JSON"
@@ -65,9 +58,9 @@ curl -X POST https://$workspaceUrl/api/2.0/dbfs/mkdirs \
     -H "Content-Type: application/json" \
     --data "$JSON"
 
-######################################################################################
-# List Directories (just so we can see if it is created)
-######################################################################################
+echo '######################################################################################'
+echo '# List Directories (just so we can see if it is created)'
+echo '######################################################################################'
 JSON="{ \"path\" : \"dbfs:/\" }"
 
 echo "curl https://$workspaceUrl/api/2.0/dbfs/list -d $JSON"
@@ -79,9 +72,9 @@ curl -X GET https://$workspaceUrl/api/2.0/dbfs/list \
     -H "Content-Type: application/json" \
     --data "$JSON"
 
-######################################################################################
-# Upload Init Scripts
-######################################################################################
+echo '######################################################################################'
+echo '# Upload Init Scripts'
+echo '######################################################################################'
 replaceSource="./"
 replaceDest=""
 
@@ -104,9 +97,9 @@ find . -type f -name "*" -print0 | while IFS= read -r -d '' file; do
 
 done
 
-######################################################################################
-# List Init Scripts (just so we can see if it is created)
-######################################################################################
+echo '######################################################################################'
+echo '# List Init Scripts (just so we can see if it is created)'
+echo '######################################################################################'
 JSON="{ \"path\" : \"$initScriptsPath\" }"
 
 echo "curl https://$workspaceUrl/api/2.0/dbfs/list -d $JSON"
